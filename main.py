@@ -18,7 +18,7 @@ def main(page: ft.Page):
         if name:
             greeting_text.value = f"Привет, {name}!"
             name_input.value = ""
-            greet_button.text = 'Поздороваться еще раз'
+            # greet_button.text = 'Поздороваться еще раз'
 
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             greeting_history.append(f"{timestamp} - {name}")
@@ -27,13 +27,41 @@ def main(page: ft.Page):
             greeting_text.value = "Пожалуйста, введите имя."
         
         page.update()
-    
+
     name_input = ft.TextField(label="Введите ваше имя", autofocus=True, on_submit=on_button_click)
 
-    theme_button = ft.IconButton(icon=ft.Icons.BRIGHTNESS_6, tooltip='Сменить тему')
+    def toggle_theme(_):
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            page.theme_mode = ft.ThemeMode.DARK
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
 
-    greet_button = ft.ElevatedButton("Поздороваться", on_click=on_button_click)
+        page.update()
 
-    page.add(greeting_text, name_input, greet_button, theme_button, history_text)
+    def clear_history(_):
+        greeting_history.clear()
+        history_text.value = "История приветствий:"
+        page.update()
 
-ft.app(main)
+    def copy_greeting(_):
+        page.set_clipboard(greeting_text.value)
+
+    clear_button = ft.ElevatedButton("Очистить историю", icon=ft.Icons.DELETE , 
+                                     on_click=clear_history)
+
+    theme_button = ft.IconButton(icon=ft.Icons.BRIGHTNESS_6, tooltip='Сменить тему', 
+                                 on_click=toggle_theme)
+
+    greet_button = ft.ElevatedButton("Поздороваться", icon=ft.Icons.HANDSHAKE, on_click=on_button_click)
+    copy_button = ft.IconButton(icon=ft.Icons.COPY, tooltip='Скопировать приветствие', 
+                                on_click=copy_greeting)
+    # page.add(greeting_text, name_input, greet_button, theme_button, clear_button, history_text)
+
+    page.add(
+        # ft.Row([theme_button, clear_button], alignment=ft.MainAxisAlignment.CENTER),
+             ft.Row([greeting_text, copy_button], alignment=ft.MainAxisAlignment.CENTER),
+             ft.Row([name_input, greet_button, theme_button, clear_button], 
+                    alignment=ft.MainAxisAlignment.CENTER),
+             history_text)
+
+ft.app(main, view=ft.WEB_BROWSER)
