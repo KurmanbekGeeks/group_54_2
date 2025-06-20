@@ -10,7 +10,25 @@ def main(page: ft.Page):
 
     greeting_history = []
 
-    history_text = ft.Text("История приветствий:")
+    # history_text = ft.Text("История приветствий:")
+
+    def update_history_view():
+        history_controls = [ft.Text("История приветствий:", size='bodyMedium')]
+        for ind, name in enumerate(greeting_history):
+            history_controls.append(
+                ft.Row([
+                    ft.Text(name),
+                    ft.IconButton(icon=ft.Icons.CLOSE, tooltip='Удалить',
+                                  on_click=lambda e, i=ind: remove_name_from_history(i))
+                ])
+            )
+        history_column.controls = history_controls
+        page.update()
+
+    def remove_name_from_history(index):
+        if 0 <= index < len(greeting_history):  
+            del greeting_history[index]
+            update_history_view()
 
     def on_button_click(e):
         name = name_input.value.strip()
@@ -20,9 +38,11 @@ def main(page: ft.Page):
             name_input.value = ""
             # greet_button.text = 'Поздороваться еще раз'
 
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            greeting_history.append(f"{timestamp} - {name}")
-            history_text.value = "История приветствий:\n" + "\n".join(greeting_history)
+            # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # greeting_history.append(f"{timestamp} - {name}")
+            # history_text.value = "История приветствий:\n" + "\n".join(greeting_history)
+            greeting_history.append(name)
+            update_history_view()
         else:
             greeting_text.value = "Пожалуйста, введите имя."
         
@@ -40,7 +60,8 @@ def main(page: ft.Page):
 
     def clear_history(_):
         greeting_history.clear()
-        history_text.value = "История приветствий:"
+        # history_controls.value = "История приветствий:"
+        update_history_view()
         page.update()
 
     def copy_greeting(_):
@@ -57,11 +78,14 @@ def main(page: ft.Page):
                                 on_click=copy_greeting)
     # page.add(greeting_text, name_input, greet_button, theme_button, clear_button, history_text)
 
+    history_column = ft.Column([])
+    update_history_view()
+
     page.add(
         # ft.Row([theme_button, clear_button], alignment=ft.MainAxisAlignment.CENTER),
              ft.Row([greeting_text, copy_button], alignment=ft.MainAxisAlignment.CENTER),
              ft.Row([name_input, greet_button, theme_button, clear_button], 
                     alignment=ft.MainAxisAlignment.CENTER),
-             history_text)
+             history_column)
 
 ft.app(main, view=ft.WEB_BROWSER)
